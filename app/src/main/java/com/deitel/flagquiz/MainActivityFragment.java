@@ -35,6 +35,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 public class MainActivityFragment extends Fragment {
    // String used when logging error messages
    private static final String TAG = "FlagQuiz Activity";
@@ -58,6 +60,11 @@ public class MainActivityFragment extends Fragment {
    private LinearLayout[] guessLinearLayouts; // rows of answer Buttons
    private TextView answerTextView; // displays correct answer
 
+   private int score = 0;
+   private int tracker = 0;
+   private TextView scoreTextView;
+
+
    // configures the MainActivityFragment when its View is created
    @Override
    public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -77,6 +84,8 @@ public class MainActivityFragment extends Fragment {
       shakeAnimation.setRepeatCount(3); // animation repeats 3 times
 
       // get references to GUI components
+
+      scoreTextView = (TextView) view.findViewById(R.id.scoreTextView);
       quizLinearLayout =
          (LinearLayout) view.findViewById(R.id.quizLinearLayout);
       questionNumberTextView =
@@ -104,6 +113,10 @@ public class MainActivityFragment extends Fragment {
       // set questionNumberTextView's text
       questionNumberTextView.setText(
          getString(R.string.question, 1, FLAGS_IN_QUIZ));
+
+      // set scoreTextView text
+      scoreTextView.setText(
+              getString(R.string.score,0));
       return view; // return the fragment's view for display
    }
 
@@ -152,6 +165,8 @@ public class MainActivityFragment extends Fragment {
       correctAnswers = 0; // reset the number of correct answers made
       totalGuesses = 0; // reset the total number of guesses the user made
       quizCountriesList.clear(); // clear prior list of quiz countries
+      tracker = 0;
+      score = 0;
 
       int flagCounter = 1;
       int numberOfFlags = fileNameList.size();
@@ -183,6 +198,9 @@ public class MainActivityFragment extends Fragment {
       // display current question number
       questionNumberTextView.setText(getString(
          R.string.question, (correctAnswers + 1), FLAGS_IN_QUIZ));
+      // set scoreTextView text
+      scoreTextView.setText(
+              getString(R.string.score,score));
 
       // extract the region from the next image's name
       String region = nextImage.substring(0, nextImage.indexOf('-'));
@@ -294,6 +312,12 @@ public class MainActivityFragment extends Fragment {
          if (guess.equals(answer)) { // if the guess is correct
             ++correctAnswers; // increment the number of correct answers
 
+            if (tracker == 0) {
+               score+= 1;
+            }
+            else {
+               tracker = 0;
+            }
             // display correct answer in green text
             answerTextView.setText(answer + "!");
             answerTextView.setTextColor(
@@ -315,7 +339,7 @@ public class MainActivityFragment extends Fragment {
                         builder.setMessage(
                            getString(R.string.results,
                               totalGuesses,
-                              (1000 / (double) totalGuesses)));
+                              (1000 / (double) totalGuesses),score));
 
                         // "Reset Quiz" Button
                         builder.setPositiveButton(R.string.reset_quiz,
@@ -347,6 +371,7 @@ public class MainActivityFragment extends Fragment {
             }
          }
          else { // answer was incorrect
+            tracker++;
             flagImageView.startAnimation(shakeAnimation); // play shake
 
             // display "Incorrect!" in red
